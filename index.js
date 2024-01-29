@@ -78,7 +78,26 @@ app.get("/api/users/:_id/logs", function (req, res) {
 
   const _id = req.params._id;
   const username = users.get(_id);
-  const exercisesArr = exercises.get(_id) || [];
+
+  let from = new Date(req.query.from);
+  let to = new Date(req.query.to);
+  const limit = parseInt(req.query.limit) || -1;
+
+  if (isNaN(from)) from = new Date(0);
+  from = from.getTime();
+
+  if (isNaN(to)) to = Infinity;
+  else to = to.getTime();
+
+  let exercisesArr = exercises.get(_id) || [];
+  exercisesArr = exercisesArr.filter(function (exercise) {
+    const exercisesDate = new Date(exercise.date);
+    return exercisesDate.getTime() >= from && exercisesDate.getTime() <= to;
+  });
+
+  if (limit > 0 && limit <= exercisesArr.length) {
+    exercisesArr = exercisesArr.slice(0, limit);
+  }
   const count = exercisesArr.length;
 
   res.json({
