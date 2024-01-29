@@ -59,7 +59,6 @@ app.post("/api/users/:_id/exercises", function (req, res) {
 
   const arr = exercises.get(_id) || [];
   const exercise = {
-    username,
     description,
     duration,
     date,
@@ -68,7 +67,26 @@ app.post("/api/users/:_id/exercises", function (req, res) {
 
   exercises.set(_id, arr);
 
-  res.json({ ...exercise, _id });
+  res.json({ username, ...exercise, _id });
+});
+
+app.get("/api/users/:_id/logs", function (req, res) {
+  if (!users.has(req.params._id)) {
+    res.json({ error: "user does not exist" });
+    return;
+  }
+
+  const _id = req.params._id;
+  const username = users.get(_id);
+  const exercisesArr = exercises.get(_id) || [];
+  const count = exercisesArr.length;
+
+  res.json({
+    username,
+    count,
+    _id,
+    log: exercisesArr,
+  });
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
